@@ -4,6 +4,41 @@
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="IE=Edge">
         <title>App Title</title>
+        <script>
+            if('ExtCall' in window.external) {
+                window.onerror = function() {
+                    alert("This app cannot proceed further due to script error.");
+                    window.external.ExtCall("Close");
+                }
+            }
+            
+            var cbExtCall = ('ExtCall' in window.external) ? function() {
+                    if(arguments.length == 1) {
+                        return window.external.ExtCall(arguments[0]);
+                    } else if(arguments.length == 2) {
+                        return window.external.ExtCall(arguments[0], arguments[1]);
+                    } else if(arguments.length == 3) {
+                        return window.external.ExtCall(arguments[0], arguments[1], arguments[2]);
+                    } else if(arguments.length == 4) {
+                        return window.external.ExtCall(arguments[0], arguments[1], arguments[2], arguments[3]);
+                    } else if(arguments.length == 5) {
+                        return window.external.ExtCall(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
+                    }
+                    
+                } : function() {
+                    if(arguments[0] == 'GetCurrentLanguage') {
+                        return 'en';
+                    } else {
+                        console.log(arguments);
+                    }
+                };
+
+            if('ExtCall' in window.external) {
+                console.log = function() {
+                    cbExtCall('ConsoleLog', JSON.stringify(arguments));
+                }
+            }
+        </script>
         <script src='locale/de.js'></script>
         <script src='locale/en.js'></script>
         <script src='locale/ja.js'></script>
@@ -14,9 +49,10 @@
     </head>
     <body>
         <div id='app'>
+            <div id='origin-graph' v-if='hasOriginGraph'></div>
         </div>
         <script>
-            var defaultLocale = "en";
+            var defaultLocale = cbExtCall("GetCurrentLanguage");
             var messages = {
                 en: locale_en || {message:{}},
                 zh: locale_zh || {message:{}},
@@ -24,11 +60,13 @@
                 de: locale_de || {message:{}},
             };
             var i18n = new VueI18n({
-                locale: 'en',
+                locale: defaultLocale,
                 fallbackLocale: 'en',
                 messages: messages,
             });
-            var appdata = {};
+            var appdata = {
+                hasOriginGraph: false
+            };
             var main = {
                 data: function() { return appdata},
                 mounted: function() {},
@@ -41,6 +79,39 @@
             };
             var constructor = Vue.extend(main);
             var vm = (new constructor({'i18n':i18n})).$mount('#app');
+        </script>
+        <script>
+            var NOTIFY_RESIZE_FROM_HTML = false;
+            function getGraphRect() {
+                var OriginGraphContainer     = document.getElementById("origin-graph");
+                if(!OriginGraphContainer) {
+                    return "{}";
+                }
+                var OriginGraphContainerRect = OriginGraphContainer.getBoundingClientRect();
+                var zoom = 1; //screen.deviceXDPI / screen.logicalXDPI;
+                var rect = {
+                    left   : OriginGraphContainerRect.left * zoom,
+                    top    : OriginGraphContainerRect.top * zoom,
+                    right  : OriginGraphContainerRect.right * zoom,
+                    bottom : OriginGraphContainerRect.bottom * zoom
+                };
+                return JSON.stringify(rect);
+            }
+            if(NOTIFY_RESIZE_FROM_HTML) {
+                window.addEventListener('resize', function() {
+                    setTimeout(function(){
+                        var rect = getGraphRect();
+                        if(rect) {
+                            window.external.ExtCall('DOMResize', getGraphRect());
+                        }
+                    },25);
+                });
+                
+                var rect = getGraphRect();
+                if(rect) {
+                    window.external.ExtCall('DOMResize', getGraphRect());
+                }
+            }
         </script>
     </body>
 </html>
