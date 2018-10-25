@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="IE=Edge">
+        <title>App Title</title>
+        <script src='js/vue.min.js'></script>
+    </head>
+    <body>
+        <div id='app'>
+        </div>
+        <script>
+            var appdata = {};
+            var main = {
+                data: function() { return appdata},
+                mounted: function() {},
+                updated: function() {
+                    this.$nextTick(function(){});
+                },
+                methods: {},
+                computed: {},
+                watch: {}
+            };
+            var constructor = Vue.extend(main);
+            var vm = (new constructor()).$mount('#app');
+        </script>
+    </body>
+</html>
