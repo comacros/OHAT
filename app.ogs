@@ -1,0 +1,7 @@
+[main]
+
+    // %@A - Origin app folder, usually %LocalAppData%\OriginLab\Apps\
+    // %@X - Origin app name
+    
+    run.loadoc(%@A%@X\app.cpp, 16);
+    run -oc Launch%@XDialog;
