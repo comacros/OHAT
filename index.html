@@ -4,13 +4,30 @@
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="IE=Edge">
         <title>App Title</title>
+        <script src='locale/de.js'></script>
+        <script src='locale/en.js'></script>
+        <script src='locale/ja.js'></script>
+        <script src='locale/zh.js'></script>
         <script src='js/vue.min.js'></script>
+        <script src='js/vue-i18n.min.js'></script>
         <link rel='stylesheet' href='css/style.css'>
     </head>
     <body>
         <div id='app'>
         </div>
         <script>
+            var defaultLocale = "en";
+            var messages = {
+                en: locale_en || {message:{}},
+                zh: locale_zh || {message:{}},
+                ja: locale_ja || {message:{}},
+                de: locale_de || {message:{}},
+            };
+            var i18n = new VueI18n({
+                locale: 'en',
+                fallbackLocale: 'en',
+                messages: messages,
+            });
             var appdata = {};
             var main = {
                 data: function() { return appdata},
@@ -23,7 +40,7 @@
                 watch: {}
             };
             var constructor = Vue.extend(main);
-            var vm = (new constructor()).$mount('#app');
+            var vm = (new constructor({'i18n':i18n})).$mount('#app');
         </script>
     </body>
 </html>
